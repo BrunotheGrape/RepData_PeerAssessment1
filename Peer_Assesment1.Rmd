@@ -13,6 +13,8 @@ We begin our analysis by loading the dataset and R packages we will be needing f
 library(ggplot2)
 library(dplyr)
 library(xtable)
+library(lattice)
+library(plotly)
 Data <- read.csv("activity.csv", header = TRUE)
 ```
 
@@ -57,7 +59,50 @@ median(mdd$steps)
 I use the aggregate function to create a new data set of mean steps and by interval and plot the result and return the maximum value by interval
 ```{r}
 spd <- aggregate(steps~interval, data=Data, mean)
-plot(spd$interval, spd$steps, type = "l")
+plot(spd$interval, spd$steps, type = "l", xlab = "5 Minute Intervals", ylab = "Average Number of Steps")
 spdmx <- spd[order(-spd$steps),]
 spdmx[1,]
 ```
+
+There are a lot of missing data points in the original set. We can insert the mean in the place of the missing values. This will center the data more around the mean. First a count of the number of missing data points or NAs. To start with lets look at each column seperately.
+
+```{r}
+sum(is.na(Data$steps))
+sum(is.na(Data$date))
+sum(is.na(Data$interval))
+```
+
+The only column with NAs is the steps column which contains 2,304 missing data points. We can replace the NAs with the median value for the daily average calculated above.
+
+```{r}
+mn <- median(mdd$steps)
+Dataadj <- Data
+Dataadj[is.na(Dataadj)] <- mn
+```
+
+I now create a histogram of the results. Not surprisingly the histogram follows the same general shape as the original but with a higher peak as the data clusters more tightly around the mean. 
+
+```{r}
+spdadj <- aggregate(steps~date, data=Dataadj, sum)
+hist(spdadj$steps, ylab = "Number of Days", xlab = "Sum of Steps", main = "Adjusted Steps per Day")
+```
+
+Next we look at the mean and median of the adjusted data set. As expected, the values are more closely clustered around the mean. We get some values for the median in this set but these values are heavily influence by the adjusted data.
+
+```{r}
+aggregate(steps~date, data=Dataadj, mean)
+aggregate(steps~date, data=Dataadj, median)
+```
+
+```{r}
+Datadys <- mutate(Data, wkdy = weekdays(as.POSIXlt(Data$date)))
+Datawe <- filter(Datadys, wkdy == c("Saturday", "Sunday"))
+Dagwe <- aggregate(steps~date, data=Datawe, sum)
+Datawd <- filter(Datadys, wkdy == c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
+Dagwd <- aggregate(steps~date, data=Datawd, sum)
+
+par(mfrow = c(1,2))
+plot_ly(data = Dagwe, x = date, y = steps)
+plot_ly(data = Dagwd, x = date, y = steps)
+```
+
