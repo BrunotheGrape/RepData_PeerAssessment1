@@ -1,0 +1,16 @@
+---
+title: "Fitness Data Analysis"
+author: "BI"
+date: "December 18, 2015"
+output: html_document
+---
+
+The purpose of this analysis is to look at fitness data collected on personal fitness monitors in 5 minute increments. The data set analyzed is the Activity Monitoring Data in the csv file activity.csv.
+
+We begin our analysis by loading the dataset and R packages we will be needing for the analysis.
+```{r}
+library(ggplot2)
+library(dplyr)
+Data <- read.csv("activity.csv", header = TRUE)
+```
+
