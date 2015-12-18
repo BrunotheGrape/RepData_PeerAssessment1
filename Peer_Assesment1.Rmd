@@ -8,9 +8,26 @@ output: html_document
 The purpose of this analysis is to look at fitness data collected on personal fitness monitors in 5 minute increments. The data set analyzed is the Activity Monitoring Data in the csv file activity.csv.
 
 We begin our analysis by loading the dataset and R packages we will be needing for the analysis.
+
 ```{r}
 library(ggplot2)
 library(dplyr)
+library(xtable)
 Data <- read.csv("activity.csv", header = TRUE)
 ```
 
+Next I use the aggregate function to calculate the number of steps by date and then create a histogram of the result.
+
+```{r}
+spds <- aggregate(steps~date, data=Data, sum)
+hist(spds$steps, ylab = "Number of Days", xlab = "Sum of Steps", main = "Steps per Day")
+```
+
+Next I look at the mean and median of the data on a daily basis and I get the following:
+
+```{r}
+tblave <- xtable(aggregate(steps~date, data=Data, mean))
+tblmn <- xtable(aggregate(steps~date, data=Data, median))
+print(tblave, type = "HTML")
+print(tblmn, type = "HTML")
+```
