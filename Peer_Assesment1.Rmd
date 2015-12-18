@@ -23,11 +23,41 @@ spds <- aggregate(steps~date, data=Data, sum)
 hist(spds$steps, ylab = "Number of Days", xlab = "Sum of Steps", main = "Steps per Day")
 ```
 
-Next I look at the mean and median of the data on a daily basis and I get the following:
+Next I look at the mean data on a daily basis and I get the following:
 
 ```{r}
-tblave <- xtable(aggregate(steps~date, data=Data, mean))
-tblmn <- xtable(aggregate(steps~date, data=Data, median))
-print(tblave, type = "HTML")
-print(tblmn, type = "HTML")
+aggregate(steps~date, data=Data, mean)
+```
+
+When we print out the median we the result is so small that we get a lot of 0s as a result. Here are a few rows to demonstrate.
+
+```{r}
+demo <- aggregate(steps~date, data=Data, median)
+demo[1:5, ]
+```
+
+Looking at the data set it is easy to see why. The data is overwhelmed by the number of zeros.Of 17,568 observations 11,014 are 0
+
+```{r}
+sum(Data$steps == 0, na.rm = TRUE)
+```
+
+I chose to groom the data to give a more meaningful result. I subsetted for the data for values that were not NA or 0 and calculated the median on the result. This is not a daily median, but a media for the entire data set less zeros and NAs. I then calculate the median of the average daily number of steps.
+
+```{r}
+mdsna <- Data[,1]
+mdsna <- mdsna[!is.na(mdsna)]
+mdsna <- mdsna[mdsna != 0]
+md <- median(mdsna)
+md
+mdd <- aggregate(steps~date, data=Data, mean)
+median(mdd$steps)
+```
+
+I use the aggregate function to create a new data set of mean steps and by interval and plot the result and return the maximum value by interval
+```{r}
+spd <- aggregate(steps~interval, data=Data, mean)
+plot(spd$interval, spd$steps, type = "l")
+spdmx <- spd[order(-spd$steps),]
+spdmx[1,]
 ```
